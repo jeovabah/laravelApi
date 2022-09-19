@@ -33,22 +33,26 @@ class AuthController extends Controller
             return response(["message" => $e->getMessage()], 500);
         }
     }
-    public function login (Request $request) {
+    public function login(Request $request) {
         try {
-            $user = User::where('email', $request->input('email'))->first();
-            if (!$user) {
-                return response(["message" => "User not found"], 404);
-            }
-            if (!password_verify($request->input('password'), $user->password)) {
-                return response(["message" => "Invalid credentials"], 401);
-            }
-            
-            $token = $user->createToken('myapptoken')->plainTextToken;
-            $response = [
-                'user' => $user,
-                "token" => $token,
-            ];
-            return response($response, 200);
+            $fields = $request-> validate([
+                'email' => "required|string",
+                'password' => "required|string"
+             ]);
+             
+             if (!$token = auth()->attempt($fields)) {
+                 return response(["message" => "Invalid Credentials"], 401);
+             }
+             
+            $user = User::where('email', $fields['email'])->first();
+             $token = $user->createToken('myapptoken')->plainTextToken;
+             
+             $response = [
+                 'user' => $user,
+                 "token" => $token,
+             ];
+             
+             return response($response, 200);
         } catch (\Exception $e) {
             return response(["message" => $e->getMessage()], 500);
         }
