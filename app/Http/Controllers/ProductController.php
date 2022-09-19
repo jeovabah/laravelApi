@@ -21,8 +21,11 @@ class ProductController extends Controller
     {
         try {
             $request -> validate([
-                "name" => "required",
+                "name" => "required|unique:products|max:255",
                 "price" => "required",
+                "description" => "required",
+                "link_url" => "required|string",
+                'category_id' => 'required|string'
             ]);
             $product = Product::create($request->all());
             return response()->json($product, 200);
@@ -36,6 +39,9 @@ class ProductController extends Controller
             $product = Product::find($id);
             $product->name = $request->name;
             $product->price = $request->price;
+            $product->description = $request->description;
+            $product->link_url = $request->link_url;
+            $product->category_id = $request-> category_id;
             $product->save();
             return response()->json($product, 200);
         } catch (\Exception $e) {
@@ -63,7 +69,7 @@ class ProductController extends Controller
         }
     }
 
-    public function search( $name )
+    public function search($name)
     {
         try {
             $products = Product::where('name', 'like', '%'.$name.'%')->get();
