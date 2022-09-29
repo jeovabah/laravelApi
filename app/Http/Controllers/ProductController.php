@@ -25,7 +25,8 @@ class ProductController extends Controller
                 "price" => "required",
                 "description" => "required",
                 "link_url" => "required|string",
-                'category_id' => 'required|string'
+                'category_id' => 'required|string',
+                'is_active' => 'required|boolean',
             ]);
             $product = Product::create($request->all());
             return response()->json($product, 200);
@@ -42,6 +43,7 @@ class ProductController extends Controller
             $product->description = $request->description;
             $product->link_url = $request->link_url;
             $product->category_id = $request-> category_id;
+            $product->is_active = $request->is_active;
             $product->save();
             return response()->json($product, 200);
         } catch (\Exception $e) {
@@ -69,10 +71,28 @@ class ProductController extends Controller
         }
     }
 
-    public function search($name)
+    public function search(Request $request)
     {
         try {
-            $products = Product::where('name', 'like', '%'.$name.'%')->get();
+            $search = $request->query('search');
+            $categoryId = $request->query('category_id');
+            if ($categoryId) {
+                $products = Product::where('name', 'like', '%' . $search . '%')
+                    ->where('category_id', $categoryId)
+                    ->get();
+            } else {
+                $products = Product::where('name', 'like', '%' . $search . '%')
+                    ->get();
+            }
+            return response()->json($products, 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+    public function searchPerCategory($id)
+    {
+        try {
+            $products = Product::where('category_id', $id)->get();
             return response()->json($products, 200);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);

@@ -74,10 +74,11 @@ class CategoryController extends Controller
         }
     }
 
-    public function search($name)
+    public function search( Request $request)
     {
         try {
-            $category = Category::where('name', 'like', '%'.$name.'%')->get();
+            $search = $request->query('search');
+            $category = Category::where('name', 'like', '%'. $search.'%')->get();
             return response()->json($category, 200);
 
         }catch (\Exception $e) {
