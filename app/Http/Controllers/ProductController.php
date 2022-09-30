@@ -7,10 +7,20 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $products = Product::all();
+            $search = $request->query('search');
+            $categoryId = $request->query('category_id');
+            if ($categoryId) {
+                $products = Product::where('name', 'like', '%' . $search . '%')
+                    ->where('category_id', $categoryId)
+                    ->get();
+            } else {
+                $products = Product::where('name', 'like', '%' . $search . '%')
+                    ->get();
+            }
+            $products->load('category');
             return response()->json($products, 200);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
@@ -71,24 +81,24 @@ class ProductController extends Controller
         }
     }
 
-    public function search(Request $request)
-    {
-        try {
-            $search = $request->query('search');
-            $categoryId = $request->query('category_id');
-            if ($categoryId) {
-                $products = Product::where('name', 'like', '%' . $search . '%')
-                    ->where('category_id', $categoryId)
-                    ->get();
-            } else {
-                $products = Product::where('name', 'like', '%' . $search . '%')
-                    ->get();
-            }
-            return response()->json($products, 200);
-        } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
-    }
+    // public function search(Request $request)
+    // {
+    //     try {
+    //         $search = $request->query('search');
+    //         $categoryId = $request->query('category_id');
+    //         if ($categoryId) {
+    //             $products = Product::where('name', 'like', '%' . $search . '%')
+    //                 ->where('category_id', $categoryId)
+    //                 ->get();
+    //         } else {
+    //             $products = Product::where('name', 'like', '%' . $search . '%')
+    //                 ->get();
+    //         }
+    //         return response()->json($products, 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => $e->getMessage()], 500);
+    //     }
+    // }
     public function searchPerCategory($id)
     {
         try {
